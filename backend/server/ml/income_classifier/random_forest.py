@@ -1,9 +1,10 @@
 import joblib 
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 class RandomForestClassifier:
     def __init__(self):
-        path_to_artifacts = "/code/ml_research/"
+        path_to_artifacts = "/code/ml_research/adult_income/"
         self.values_fill_missing =  joblib.load(path_to_artifacts + "train_mode.joblib")
         self.encoders = joblib.load(path_to_artifacts + "encoders.joblib")
         self.model = joblib.load(path_to_artifacts + "random_forest.joblib")
@@ -21,11 +22,14 @@ class RandomForestClassifier:
             "occupation",
             "relationship",
             "race",
-            "sex",
+            "gender",
             "native-country",
         ]:
             categorical_convert = self.encoders[column]
-            input_data[column] = categorical_convert.transform(input_data[column])
+            print(categorical_convert)
+            input_data[column] = categorical_convert.fit_transform(input_data[column])
+
+        print(input_data.head())
 
         return input_data
 
@@ -39,11 +43,15 @@ class RandomForestClassifier:
         return {"probability": input_data[1], "label": label, "status": "OK"}
 
     def compute_prediction(self, input_data):
+        print("RANDOM FOREST CLASS END COMPUTE METHOD")
         try:
             input_data = self.preprocessing(input_data)
+            print("PREPROCESSING PASS")
             prediction = self.predict(input_data)[0]  # only one sample
+            print("PREDICTION PASS")
             prediction = self.postprocessing(prediction)
+            print("POSTPROCESSING PASS")
         except Exception as e:
             return {"status": "Error", "message": str(e)}
-
+        
         return prediction
